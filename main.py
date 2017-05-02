@@ -6,12 +6,20 @@ import sys
 import pyscreeze
 import pygame
 import os
+from classes import Node, Graph
+import termios
+import tty
+
 
 
 #Global Variables
 screenWidth, screenHeight = pyautogui.size()
 print screenHeight
 print screenWidth
+
+graphMaster = Graph()
+parentRoot = Node(name = "Root")
+graphMaster.addNode(parentRoot)
 
 class Application(tk.Frame):
     def __init__(self, master = None):
@@ -29,6 +37,7 @@ class Application(tk.Frame):
     def quitFunc(self):
         sys.exit()
 
+    #Updates values and creates the node tree structure    
     def changeText(self):
         #update self.listele
         for files in os.listdir("./Elements"):            
@@ -49,11 +58,27 @@ class Application(tk.Frame):
         
         ### This gets the currently selected item menu ####
         print self.varele.get()
+        parentName = self.varele.get()     
+       
 
         self.filename = self.inputEleName.get()        
         self.labelX.config(text="Values set : "+self.filename) 
         self.height =  self.inputHeight.get()
         self.width =  self.inputWidth.get()
+
+         #create a node object
+         #Rootlevel nodes
+        if(parentName  == "Root"):
+            newNode = Node(name = self.filename, parent = parentName)
+            graphMaster.addNode(newNode)
+        else:
+            #find the node in the graph
+            existNode = graphMaster.getNode(self.filename)
+            if(existNode != "Not Found"):
+                #create a new node append as children to existing Nodes
+                newNode = Node(name = self.filename, parent = existNode)
+                existNode.addChildren(newNode)
+        
              
         #self.master.iconify()
     
@@ -72,7 +97,18 @@ class Application(tk.Frame):
         self.labelX.config(text = testpos)
         #click Test
         posx, posy = pyautogui.center(testpos)
-        pyautogui.click(posx, posy)
+        pyautogui.click(posx, posy)        
+        #get screen shot
+        im=pyautogui.screenshot(region=(posx, posy+20, 40, 20))
+        im.save("file.jpg")
+        #View Current graph
+        graphele = graphMaster.nodes
+        for n1 in graphele:
+            print "#name :" + n1.name 
+            childNodes = n1.children
+            for eachChild in childNodes:
+                print "Chidren arw"
+                print childNodes.name + " :  Parent : " + childNodes.parent.name
 
     def createWidjet(self):
         self.quitButton=tk.Button(self, text='QUIT', command = self.quitFunc)
@@ -116,8 +152,11 @@ class Application(tk.Frame):
         self.changeText=tk.Button(self, text='Set Values', command = self.changeText)
         self.changeText.grid(row = 2, column = 5  )
     
-    def show(self, event):      
-        if(event.keysym == "space"):
+    def show(self, event):         
+        # if(event.keysym == "Return"):
+        #     self.master.iconify()              
+
+         if(event.keysym == "space"):              
             #Get mouse position 
             currentMouseX, currentMouseY = pyautogui.position()
             print(currentMouseX)
@@ -138,8 +177,10 @@ class Application(tk.Frame):
                 self.labelX.config(text = "Please enter the component name in the input box" )            
            
             #DONE
-            self.labelX.config(text="DONE") 
+            self.labelX.config(text="DONE")            
             #pyautogui.click()
+            
+
 
     
        
@@ -149,3 +190,29 @@ app.master.title('Input Database creator')
 app.mainloop()
 
 
+# ######## Main Application Code #########
+# while True:
+#     os.system("stty raw -echo")
+#     c = sys.stdin.read(1)
+#     print ord(c)
+#     if(ord(c) == 13):
+#         ## Call the application Code
+#         app.mainloop()
+#     elif(ord(c) == 32):
+#             ## capture Screen                    
+#             #Get mouse position 
+#             currentMouseX, currentMouseY = pyautogui.position()
+#             print(currentMouseX)
+#             print(currentMouseY)
+#             print "Done!!"
+#             offsetx=6
+#             offsety=6          
+           
+           
+#             im=pyautogui.screenshot(region=(currentMouseX-offsetx, currentMouseY-offsety, 20, 40))            
+#             im.save(os.path.join("./Elements/test.png"))
+#     elif(ord(c) == 113):
+#         sys.exit()
+
+
+#     os.system("stty -raw echo")
