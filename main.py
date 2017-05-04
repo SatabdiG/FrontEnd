@@ -13,6 +13,7 @@ import tty
 
 
 #Global Variables
+childOffsetX = 20
 screenWidth, screenHeight = pyautogui.size()
 print screenHeight
 print screenWidth
@@ -92,7 +93,7 @@ class Application(tk.Frame):
 
     def Detect(self):
         #Check if an image can be detected
-        testpos = pyautogui.locateOnScreen("./Elements/Audio.png");
+        testpos = pyautogui.locateOnScreen("./Elements/Audio.png")
         print testpos
         self.labelX.config(text = testpos)
         #click Test
@@ -110,6 +111,31 @@ class Application(tk.Frame):
                 print "Chidren arw"
                 print childNodes.name + " :  Parent : " + childNodes.parent.name
 
+    def addChild(self):
+        print "Clicked!!"
+        #get Parent
+        parentName = self.varele.get()  
+        componentName = self.inputEleName.get()   
+        print parentName
+        ## get value as to the number of child
+        childNum = int(self.inputNumChild.get())
+        childNum += 1
+        print childNum
+        ### Locate parent Name in App and Click
+        testpos = pyautogui.locateOnScreen("./Elements/"+parentName+".png")
+        posx, posy = pyautogui.center(testpos)
+        pyautogui.click(posx, posy)
+        numOff = childNum*childOffsetX        
+        ### Move mouse by childNum times current position
+        newPosX = posx + int((childOffsetX)*childNum)
+        ### Take Screen Shot With Name ###
+        im=pyautogui.screenshot(region=(posx - 15, posy + numOff, 70, 20))
+        im.save("./Elements/"+componentName+".png")
+
+
+
+
+
     def createWidjet(self):
         self.quitButton=tk.Button(self, text='QUIT', command = self.quitFunc)
         self.quitButton.grid(row = 9, column = 4 )   
@@ -118,7 +144,17 @@ class Application(tk.Frame):
         self.quitButton=tk.Button(self, text='HELP', command = self.Help)
         self.quitButton.grid(row = 9, column =  6 )
         self.detectButton=tk.Button(self, text='DetectTest', command = self.Detect)
-        self.detectButton.grid(row = 13, column =  5 )                
+        self.detectButton.grid(row = 13, column =  5 ) 
+        """ Add child """
+        self.addChild=tk.Button(self, text='Add Child', command = self.addChild)
+        self.addChild.grid(row = 16, column =  5 )
+        """ State which number child """
+        self.labelChild=tk.Label(self, text="Enter ChildNumber")
+        self.labelChild.grid(row = 14,column = 5  )
+
+        self.inputNumChild = tk.Entry(self , width = 30)
+        self.inputNumChild.grid(row = 15, column = 5)
+
         self.labelX=tk.Label(self, text="Welcome to input database creator")
         self.labelX.grid(row = 11,column = 5  )
         #The name of the Element
